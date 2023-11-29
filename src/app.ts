@@ -1,5 +1,6 @@
 import cors from "cors";
 import express, { Application, Request, Response } from "express";
+import notFound from "./middleware/notFound";
 
 const app: Application = express();
 
@@ -8,11 +9,13 @@ app.use(express.json());
 app.use(cors());
 
 app.get("/", (req: Request, res: Response) => {
-    res.status(200).json({
-        success: true,
-        message: "Welcome to PH University API",
-        data: "Apatoto Nai",
-    });
+   res.status(200).json({
+      success: true,
+      message: "Welcome to PH University API",
+      data: "Apatoto Nai",
+   });
 });
+
+app.use(notFound);
 
 export default app;
