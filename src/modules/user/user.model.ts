@@ -1,4 +1,6 @@
+import bcrypt from "bcrypt";
 import { Schema, model } from "mongoose";
+import config from "../../config";
 import { TUser } from "./user.interface";
 
 const userSchema = new Schema<TUser>(
@@ -35,5 +37,12 @@ const userSchema = new Schema<TUser>(
       timestamps: true,
    },
 );
+
+userSchema.pre("save", function (next) {
+   // eslint-disable-next-line @typescript-eslint/no-this-alias
+   const user = this;
+   user.password = bcrypt.hashSync(user.password, Number(config.bcrypt_salt));
+   next();
+});
 
 export const UserModel = model<TUser>("User", userSchema);
