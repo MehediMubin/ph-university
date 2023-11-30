@@ -1,4 +1,3 @@
-import { UserModel } from "../user/user.model";
 import { StudentModel } from "./student.model";
 
 const getAllStudents = async () => {
