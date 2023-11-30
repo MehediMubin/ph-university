@@ -1,4 +1,3 @@
-import { ObjectId } from "mongoose";
 import catchAsync from "../../utils/catchAsync";
 import sendResponse from "../../utils/sendResponse";
 import { AcademicSemesterServices } from "./academicSemester.service";
