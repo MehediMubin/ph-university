@@ -40,7 +40,27 @@ const getSingleStudent = async (
    }
 };
 
+const deleteSingleStudent = async (
+   req: Request,
+   res: Response,
+   next: NextFunction,
+) => {
+   try {
+      const { id } = req.params;
+      const result = await StudentServices.deleteSingleStudent(id);
+      sendResponse(res, {
+         statusCode: 200,
+         success: true,
+         message: "Student deleted successfully",
+         data: result,
+      });
+   } catch (err) {
+      next(err);
+   }
+};
+
 export const StudentController = {
    getAllStudents,
    getSingleStudent,
+   deleteSingleStudent,
 };
