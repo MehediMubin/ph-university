@@ -78,10 +78,6 @@ const studentSchema = new Schema<TStudent>(
          ref: "User",
          required: true,
       },
-      password: {
-         type: String,
-         required: true,
-      },
       name: {
          type: nameSchema,
          required: true,

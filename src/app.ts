@@ -1,5 +1,6 @@
 import cors from "cors";
-import express, { Application, Request, Response, Router } from "express";
+import express, { Application, Request, Response } from "express";
+import globalErrorHandler from "./middleware/globalErrorHandler";
 import notFound from "./middleware/notFound";
 import { UserRoutes } from "./modules/user/user.route";
 
@@ -19,6 +20,8 @@ app.get("/", (req: Request, res: Response) => {
       data: "Apatoto Nai",
    });
 });
+
+app.use(globalErrorHandler);
 
 app.use(notFound);
 
