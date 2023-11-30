@@ -4,7 +4,7 @@ import { StudentModel } from "../student/student.model";
 import { TUser } from "./user.interface";
 import { UserModel } from "./user.model";
 
-const createStudent = async (password: string, student: TStudent) => {
+const createStudent = async (password: string, student) => {
    const user: Partial<TUser> = {};
 
    user.id = "2030100001";
