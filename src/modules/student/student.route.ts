@@ -5,4 +5,6 @@ const router = Router();
 
 router.get("/", StudentController.getAllStudents);
 
+router.get("/:id", StudentController.getSingleStudent);
+
 export const StudentRoutes = router;

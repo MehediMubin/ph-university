@@ -20,6 +20,27 @@ const getAllStudents = async (
    }
 };
 
+const getSingleStudent = async (
+   req: Request,
+   res: Response,
+   next: NextFunction,
+) => {
+   try {
+      const { id } = req.params;
+      const student = await StudentServices.getSingleStudent(id);
+
+      sendResponse(res, {
+         statusCode: 200,
+         success: true,
+         message: "Student fetched successfully",
+         data: student,
+      });
+   } catch (err) {
+      next(err);
+   }
+};
+
 export const StudentController = {
    getAllStudents,
+   getSingleStudent,
 };

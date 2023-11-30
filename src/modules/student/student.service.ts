@@ -5,6 +5,12 @@ const getAllStudents = async () => {
    return students;
 };
 
+const getSingleStudent = async (id: string) => {
+   const student = await StudentModel.findOne({ id: id });
+   return student;
+};
+
 export const StudentServices = {
    getAllStudents,
+   getSingleStudent,
 };
