@@ -1,5 +1,4 @@
 import config from "../../config";
-import { TAcademicSemester } from "../academicSemester/academicSemester.interface";
 import { AcademicSemesterModel } from "../academicSemester/academicSemester.model";
 import { StudentModel } from "../student/student.model";
 import { TUser } from "./user.interface";
@@ -9,7 +8,6 @@ import { generateStudentId } from "./user.utils";
 const createStudent = async (password: string, payload) => {
    const user: Partial<TUser> = {};
 
-   user.id = "2030100001";
    user.password = payload.password || (config.default_password as string);
    user.role = "student";
 
@@ -17,7 +15,7 @@ const createStudent = async (password: string, payload) => {
       payload.admissionSemester,
    );
 
-   user.id = generateStudentId(admissionSemester);
+   user.id = await generateStudentId(admissionSemester);
 
    const newUser = await UserModel.create(user);
 
