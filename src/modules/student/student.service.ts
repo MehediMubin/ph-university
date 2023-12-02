@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
 import AppError from "../../errors/AppError";
 import { UserModel } from "../user/user.model";
+import { TStudent } from "./student.interface";
 import { StudentModel } from "./student.model";
 
 const getAllStudents = async () => {
@@ -25,6 +26,13 @@ const getSingleStudent = async (id: string) => {
          },
       });
    return student;
+};
+
+const updateSingleStudent = async (id: string, payload: Partial<TStudent>) => {
+   const result = await StudentModel.findOneAndUpdate({ id: id }, payload, {
+      new: true,
+   });
+   return result;
 };
 
 const deleteSingleStudent = async (id: string) => {
@@ -59,11 +67,13 @@ const deleteSingleStudent = async (id: string) => {
    } catch (err) {
       await session.abortTransaction();
       session.endSession();
+      throw Error("Student deletion failed");
    }
 };
 
 export const StudentServices = {
    getAllStudents,
    getSingleStudent,
+   updateSingleStudent,
    deleteSingleStudent,
 };

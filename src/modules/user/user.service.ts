@@ -48,6 +48,7 @@ const createStudent = async (password: string, payload) => {
    } catch (err) {
       await session.abortTransaction();
       session.endSession();
+      throw Error("Student creation failed");
    }
 };
 
