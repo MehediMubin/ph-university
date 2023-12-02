@@ -1,4 +1,6 @@
+import mongoose from "mongoose";
 import config from "../../config";
+import AppError from "../../errors/AppError";
 import { AcademicSemesterModel } from "../academicSemester/academicSemester.model";
 import { StudentModel } from "../student/student.model";
 import { TUser } from "./user.interface";
@@ -15,16 +17,37 @@ const createStudent = async (password: string, payload) => {
       payload.admissionSemester,
    );
 
-   user.id = await generateStudentId(admissionSemester);
+   const session = await mongoose.startSession();
 
-   const newUser = await UserModel.create(user);
+   try {
+      session.startTransaction();
+      user.id = await generateStudentId(admissionSemester);
 
-   if (Object.keys(newUser).length) {
-      payload.user = newUser._id;
-      payload.id = newUser.id;
-      payload.password = newUser.password;
-      const newStudent = await StudentModel.create(payload);
+      // transaction 1
+      const newUser = await UserModel.create([user], { session });
+
+      // transaction use korar karone newUser array hoye jay
+      if (!newUser.length) {
+         throw new AppError(400, "User creation failed");
+      }
+
+      payload.user = newUser[0]._id;
+      payload.id = newUser[0].id;
+
+      // transaction 2
+      const newStudent = await StudentModel.create([payload], { session });
+
+      if (!newStudent.length) {
+         throw new AppError(400, "Student creation failed");
+      }
+
+      await session.commitTransaction();
+      session.endSession();
+
       return newStudent;
+   } catch (err) {
+      await session.abortTransaction();
+      session.endSession();
    }
 };
 
