@@ -8,7 +8,7 @@ const academicDepartmentSchema = new Schema<TAcademicDepartment>(
          required: true,
          unique: true,
       },
-      facultyId: {
+      academicFaculty: {
          type: Schema.Types.ObjectId,
          ref: "academicFaculty",
          required: true,
@@ -41,6 +41,6 @@ academicDepartmentSchema.pre("findOneAndUpdate", async function (next) {
 });
 
 export const AcademicDepartmentModel = model<TAcademicDepartment>(
-   "academic-department",
+   "academicDepartment",
    academicDepartmentSchema,
 );

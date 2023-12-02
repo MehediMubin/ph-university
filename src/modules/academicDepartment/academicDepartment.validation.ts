@@ -6,9 +6,9 @@ const academicDepartmentValidationSchema = z.object({
          required_error: "Name is required",
          invalid_type_error: "Name must be a string",
       }),
-      facultyId: z.string({
-         required_error: "FacultyId is required",
-         invalid_type_error: "FacultyId must be a string",
+      academicFaculty: z.string({
+         required_error: "academic faculty is required",
+         invalid_type_error: "academic faculty must be a string",
       }),
    }),
 });
@@ -21,10 +21,10 @@ const updateAcademicDepartmentValidationSchema = z.object({
             invalid_type_error: "Name must be a string",
          })
          .optional(),
-      facultyId: z
+      academicFaculty: z
          .string({
-            required_error: "FacultyId is required",
-            invalid_type_error: "FacultyId must be a string",
+            required_error: "academic faculty is required",
+            invalid_type_error: "academic faculty must be a string",
          })
          .optional(),
    }),
