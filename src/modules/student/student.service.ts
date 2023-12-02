@@ -1,4 +1,3 @@
-import { path } from "path";
 import { StudentModel } from "./student.model";
 
 const getAllStudents = async () => {
@@ -14,7 +13,14 @@ const getAllStudents = async () => {
 };
 
 const getSingleStudent = async (id: string) => {
-   const student = await StudentModel.findOne({ id: id });
+   const student = await StudentModel.findOne({ id: id })
+      .populate("admissionSemester")
+      .populate({
+         path: "academicDepartment",
+         populate: {
+            path: "academicFaculty",
+         },
+      });
    return student;
 };
 
