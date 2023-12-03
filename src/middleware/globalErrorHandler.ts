@@ -1,15 +1,16 @@
 import { ErrorRequestHandler } from "express";
 import { ZodError } from "zod";
 import config from "../config";
+import AppError from "../errors/AppError";
 import handleCastError from "../errors/handleCastError";
+import handleDuplicateError from "../errors/handleDuplicateError";
 import handleValidationError from "../errors/handleValidationError";
 import handleZodError from "../errors/handleZodError";
 import { TErrorSource } from "../interface/error";
-import handleDuplicateError from "../errors/handleDuplicateError";
 
 const globalErrorHandler: ErrorRequestHandler = (error, req, res, next) => {
-   let statusCode = error.statusCode || 500;
-   let message = error.message || "Something went wrong";
+   let statusCode = 500;
+   let message = "Something went wrong";
 
    let errorSources: TErrorSource[] = [
       {
@@ -37,6 +38,24 @@ const globalErrorHandler: ErrorRequestHandler = (error, req, res, next) => {
       statusCode = simplifiedError.statusCode;
       message = simplifiedError.message;
       errorSources = simplifiedError.errorSources;
+   } else if (error instanceof AppError) {
+      statusCode = error.statusCode;
+      message = error.message;
+      errorSources = [
+         {
+            path: "",
+            message: error.message,
+         },
+      ];
+   } else if (error instanceof Error) {
+      message = error.message;
+      errorSources = [
+         {
+            path: "",
+            message: error.message,
+         },
+      ];
+   }
 
    res.status(statusCode).json({
       success: false,
