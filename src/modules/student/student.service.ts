@@ -4,8 +4,17 @@ import { UserModel } from "../user/user.model";
 import { TStudent } from "./student.interface";
 import { StudentModel } from "./student.model";
 
-const getAllStudents = async () => {
-   const students = await StudentModel.find()
+const getAllStudents = async (query: Record<string, unknown>) => {
+   let searchQuery = "";
+   if (query?.search) {
+      searchQuery = query.search as string;
+   }
+
+   const students = await StudentModel.find({
+      $or: ["email", "name.firstName", "name.lastName"].map((field) => ({
+         [field]: { $regex: searchQuery, $options: "i" },
+      })),
+   })
       .populate("admissionSemester")
       .populate({
          path: "academicDepartment",
