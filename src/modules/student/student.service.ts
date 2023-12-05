@@ -34,6 +34,11 @@ const getAllStudents = async (query: Record<string, unknown>) => {
       skip = (page - 1) * limit;
    }
 
+   let fields = "-__v";
+   if (query?.fields) {
+      fields = (query.fields as string).split(",").join(" ");
+   }
+
    const students = await StudentModel.find({
       $or: studentSearchableFields.map((field) => ({
          [field]: { $regex: searchQuery, $options: "i" },
@@ -43,6 +48,7 @@ const getAllStudents = async (query: Record<string, unknown>) => {
       .sort(sort)
       .skip(skip)
       .limit(limit)
+      .select(fields)
       .populate("admissionSemester")
       .populate({
          path: "academicDepartment",
