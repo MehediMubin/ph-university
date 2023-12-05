@@ -13,7 +13,7 @@ const getAllStudents = async (query: Record<string, unknown>) => {
    }
 
    const queryObject = { ...query };
-   const excludeFields = ["search", "sort", "limit"];
+   const excludeFields = ["search", "sort", "limit", "page", "fields"];
    excludeFields.forEach((field) => delete queryObject[field]);
 
    let sort = "-createdAt";
@@ -21,9 +21,17 @@ const getAllStudents = async (query: Record<string, unknown>) => {
       sort = query.sort as string;
    }
 
+   let page = 1;
    let limit = 1;
+   let skip = 0;
+
    if (query?.limit) {
       limit = Number(query.limit);
+   }
+
+   if (query.page) {
+      page = Number(query.page);
+      skip = (page - 1) * limit;
    }
 
    const students = await StudentModel.find({
@@ -33,6 +41,7 @@ const getAllStudents = async (query: Record<string, unknown>) => {
    })
       .find(queryObject)
       .sort(sort)
+      .skip(skip)
       .limit(limit)
       .populate("admissionSemester")
       .populate({
