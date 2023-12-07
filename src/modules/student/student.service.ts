@@ -60,7 +60,7 @@ const getAllStudents = async (query: Record<string, unknown>) => {
 };
 
 const getSingleStudent = async (id: string) => {
-   const student = await StudentModel.findOne({ id: id })
+   const student = await StudentModel.findById(id)
       .populate("admissionSemester")
       .populate({
          path: "academicDepartment",
@@ -94,13 +94,9 @@ const updateSingleStudent = async (id: string, payload: Partial<TStudent>) => {
       }
    }
 
-   const result = await StudentModel.findOneAndUpdate(
-      { id: id },
-      updatedPayload,
-      {
-         new: true,
-      },
-   );
+   const result = await StudentModel.findByIdAndUpdate(id, updatedPayload, {
+      new: true,
+   });
    return result;
 };
 
@@ -109,8 +105,8 @@ const deleteSingleStudent = async (id: string) => {
    try {
       session.startTransaction();
 
-      const deleteStudent = await StudentModel.findOneAndUpdate(
-         { id: id },
+      const deleteStudent = await StudentModel.findByIdAndUpdate(
+         id,
          { isDeleted: true },
          { new: true, session },
       );
@@ -119,8 +115,8 @@ const deleteSingleStudent = async (id: string) => {
          throw new AppError(400, "Student not found");
       }
 
-      const deleteUser = await UserModel.findOneAndUpdate(
-         { id: id },
+      const deleteUser = await UserModel.findByIdAndUpdate(
+         id,
          { isDeleted: true },
          { new: true, session },
       );
