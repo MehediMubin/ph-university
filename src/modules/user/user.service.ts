@@ -2,11 +2,16 @@ import mongoose from "mongoose";
 import config from "../../config";
 import AppError from "../../errors/AppError";
 import { AcademicSemesterModel } from "../academicSemester/academicSemester.model";
+import { AdminModel } from "../admin/admin.model";
 import { FacultyModel } from "../faculty/faculty.model";
 import { StudentModel } from "../student/student.model";
 import { TUser } from "./user.interface";
 import { UserModel } from "./user.model";
-import { generateFacultyId, generateStudentId } from "./user.utils";
+import {
+   generateAdminId,
+   generateFacultyId,
+   generateStudentId,
+} from "./user.utils";
 
 const createStudent = async (password: string, payload) => {
    const user: Partial<TUser> = {};
@@ -90,7 +95,45 @@ const createFaculty = async (password: string, payload) => {
    }
 };
 
+const createAdmin = async (password: string, payload) => {
+   const user: Partial<TUser> = {};
+
+   user.password = password || (config.default_password as string);
+   user.role = "admin";
+
+   const session = await mongoose.startSession();
+   try {
+      session.startTransaction();
+      user.id = await generateAdminId();
+
+      const newUser = await UserModel.create([user], { session });
+
+      if (!newUser.length) {
+         throw new AppError(400, "User creation failed");
+      }
+
+      payload.user = newUser[0]._id;
+      payload.id = newUser[0].id;
+
+      const newAdmin = await AdminModel.create([payload], { session });
+
+      if (!newAdmin.length) {
+         throw new AppError(400, "Admin creation failed");
+      }
+
+      await session.commitTransaction();
+      session.endSession();
+
+      return newAdmin;
+   } catch (err) {
+      await session.abortTransaction();
+      session.endSession();
+      throw new Error("Admin creation failed");
+   }
+};
+
 export const UserServices = {
    createStudent,
    createFaculty,
+   createAdmin,
 };

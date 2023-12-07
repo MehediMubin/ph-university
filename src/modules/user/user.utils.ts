@@ -58,3 +58,26 @@ export const generateFacultyId = async () => {
    const id = `F-${newId}`;
    return id;
 };
+
+const findLastAdminId = async () => {
+   const lastAdmin = await UserModel.findOne({ role: "admin" }).sort({
+      createdAt: -1,
+   });
+
+   return lastAdmin?.id ? lastAdmin.id : undefined;
+};
+
+export const generateAdminId = async () => {
+   let initialId = (0).toString();
+
+   const lastAdminId = await findLastAdminId();
+
+   if (lastAdminId) {
+      initialId = lastAdminId.slice(2, 6);
+   }
+
+   const newId = (Number(initialId) + 1).toString().padStart(4, "0");
+
+   const id = `A-${newId}`;
+   return id;
+};
