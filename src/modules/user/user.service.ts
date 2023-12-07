@@ -6,7 +6,7 @@ import { FacultyModel } from "../faculty/faculty.model";
 import { StudentModel } from "../student/student.model";
 import { TUser } from "./user.interface";
 import { UserModel } from "./user.model";
-import { generateStudentId } from "./user.utils";
+import { generateFacultyId, generateStudentId } from "./user.utils";
 
 const createStudent = async (password: string, payload) => {
    const user: Partial<TUser> = {};
@@ -62,6 +62,7 @@ const createFaculty = async (password: string, payload) => {
    const session = await mongoose.startSession();
    try {
       session.startTransaction();
+      user.id = await generateFacultyId();
 
       const newUser = await UserModel.create([user], { session });
 

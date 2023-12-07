@@ -35,3 +35,26 @@ export const generateStudentId = async (payload: TAcademicSemester) => {
    const id = `${payload.year.slice(0, 4)}${payload.code}${newId}`;
    return id;
 };
+
+const findLastFacultyId = async () => {
+   const lastFaculty = await UserModel.findOne({ role: "faculty" }).sort({
+      createdAt: -1,
+   });
+
+   return lastFaculty?.id ? lastFaculty.id : undefined;
+};
+
+export const generateFacultyId = async () => {
+   let initialId = (0).toString();
+
+   const lastFacultyId = await findLastFacultyId();
+
+   if (lastFacultyId) {
+      initialId = lastFacultyId.slice(2, 6);
+   }
+
+   const newId = (Number(initialId) + 1).toString().padStart(4, "0");
+
+   const id = `F-${newId}`;
+   return id;
+};
