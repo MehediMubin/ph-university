@@ -8,3 +8,7 @@ router.get("/", FacultyController.getAllFaculties);
 router.get("/:id", FacultyController.getSingleFaculty);
 
 router.patch("/:id", FacultyController.updateSingleFaculty);
+
+router.delete("/:id", FacultyController.deleteSingleFaculty);
+
+export const FacultyRoutes = router;
