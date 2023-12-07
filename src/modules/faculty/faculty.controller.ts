@@ -1,30 +1,53 @@
+import catchAsync from "../../utils/catchAsync";
+import sendResponse from "../../utils/sendResponse";
 import { FacultyServices } from "./faculty.service";
 
-const getAllFaculties = async () => {
+const getAllFaculties = catchAsync(async (req, res) => {
    const faculties = await FacultyServices.getAllFaculties();
-   return faculties;
-};
+   sendResponse(res, {
+      statusCode: 200,
+      success: true,
+      message: "Faculties fetched successfully",
+      data: faculties,
+   });
+});
 
-const getSingleFaculty = async (id: string) => {
+const getSingleFaculty = catchAsync(async (req, res) => {
+   const { id } = req.params;
    const faculty = await FacultyServices.getSingleFaculty(id);
-   return faculty;
-};
 
-const updateSingleFaculty = async (
-   id: string,
-   payload: Record<string, unknown>,
-) => {
-   const updatedFaculty = await FacultyServices.updateSingleFaculty(
-      id,
-      payload,
+   sendResponse(res, {
+      statusCode: 200,
+      success: true,
+      message: "Faculty fetched successfully",
+      data: faculty,
+   });
+});
+
+const updateSingleFaculty = catchAsync(async (req, res) => {
+   const faculty = await FacultyServices.updateSingleFaculty(
+      req.params.id,
+      req.body.faculty,
    );
-   return updatedFaculty;
-};
 
-const deleteSingleFaculty = async (id: string) => {
-   const deletedFaculty = await FacultyServices.deleteSingleFaculty(id);
-   return deletedFaculty;
-};
+   sendResponse(res, {
+      statusCode: 200,
+      success: true,
+      message: "Faculty updated successfully",
+      data: faculty,
+   });
+});
+
+const deleteSingleFaculty = catchAsync(async (req, res) => {
+   const { id } = req.params;
+   const result = await FacultyServices.deleteSingleFaculty(id);
+   sendResponse(res, {
+      statusCode: 200,
+      success: true,
+      message: "Faculty deleted successfully",
+      data: result,
+   });
+});
 
 export const FacultyController = {
    getAllFaculties,
