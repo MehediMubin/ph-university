@@ -1,7 +1,7 @@
 import { Schema, model } from "mongoose";
 import { TFaculty, TName } from "./faculty.interface";
 
-const nameSchema = new Scheama<TName>({
+const nameSchema = new Schema<TName>({
    firstName: {
       type: String,
       required: true,
