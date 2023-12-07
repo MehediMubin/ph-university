@@ -59,6 +59,7 @@ const createStudent = async (password: string, payload) => {
 };
 
 const createFaculty = async (password: string, payload) => {
+   // console.log(payload);
    const user: Partial<TUser> = {};
 
    user.password = password || (config.default_password as string);

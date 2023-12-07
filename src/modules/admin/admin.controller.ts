@@ -27,7 +27,7 @@ const getSingleAdmin = catchAsync(async (req, res) => {
 const updateSingleAdmin = catchAsync(async (req, res) => {
    const admin = await AdminServices.updateSingleAdmin(
       req.params.id,
-      req.body.faculty,
+      req.body.admin,
    );
 
    sendResponse(res, {

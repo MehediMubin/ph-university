@@ -17,4 +17,4 @@ router.patch(
 
 router.delete("/:id", AdminController.deleteSingleAdmin);
 
-export const FacultyRoutes = router;
+export const AdminRoutes = router;
