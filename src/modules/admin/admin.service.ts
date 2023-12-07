@@ -9,7 +9,7 @@ const getAllAdmins = async () => {
 };
 
 const getSingleAdmin = async (id: string) => {
-   const admin = await AdminModel.findOne({ id });
+   const admin = await AdminModel.findById(id);
    return admin;
 };
 
@@ -24,13 +24,9 @@ const updateSingleAdmin = async (id: string, payload: Partial<TAdmin>) => {
       }
    }
 
-   const result = await AdminModel.findOneAndUpdate(
-      { id: id },
-      updatedPayload,
-      {
-         new: true,
-      },
-   );
+   const result = await AdminModel.findByIdAndUpdate(id, updatedPayload, {
+      new: true,
+   });
    return result;
 };
 
@@ -39,8 +35,8 @@ const deleteSingleAdmin = async (id: string) => {
    try {
       session.startTransaction();
 
-      const deleteAdmin = await AdminModel.findOneAndUpdate(
-         { id: id },
+      const deleteAdmin = await AdminModel.findByIdAndUpdate(
+         id,
          { isDeleted: true },
          { new: true, session },
       );
@@ -49,8 +45,8 @@ const deleteSingleAdmin = async (id: string) => {
          throw new Error("Admin deletion failed");
       }
 
-      const deleteUser = await UserModel.findOneAndUpdate(
-         { id: id },
+      const deleteUser = await UserModel.findByIdAndUpdate(
+         id,
          { isDeleted: true },
          { new: true, session },
       );
