@@ -26,10 +26,16 @@ const facultyValidationSchema = z.object({
    }),
 });
 
+const updateNameValidationSchema = z.object({
+   firstName: z.string().min(1).max(20).optional(),
+   middleName: z.string().optional(),
+   lastName: z.string().optional(),
+});
+
 const updateFacultyValidationSchema = z.object({
    body: z.object({
       faculty: z.object({
-         name: nameValidationSchema.optional(),
+         name: updateNameValidationSchema.optional(),
          gender: z.enum(["male", "female", "other"]).optional(),
          dateOfBirth: z.string().optional(),
          email: z.string().email().optional(),
