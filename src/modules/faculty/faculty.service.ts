@@ -9,7 +9,7 @@ const getAllFaculties = async () => {
 };
 
 const getSingleFaculty = async (id: string) => {
-   const faculty = await FacultyModel.findOne({ id });
+   const faculty = await FacultyModel.findById(id);
    return faculty;
 };
 
@@ -24,13 +24,9 @@ const updateSingleFaculty = async (id: string, payload: Partial<TFaculty>) => {
       }
    }
 
-   const result = await FacultyModel.findOneAndUpdate(
-      { id: id },
-      updatedPayload,
-      {
-         new: true,
-      },
-   );
+   const result = await FacultyModel.findByIdAndUpdate(id, updatedPayload, {
+      new: true,
+   });
    return result;
 };
 
@@ -39,8 +35,8 @@ const deleteSingleFaculty = async (id: string) => {
    try {
       session.startTransaction();
 
-      const deleteFaculty = await FacultyModel.findOneAndUpdate(
-         { id: id },
+      const deleteFaculty = await FacultyModel.findByIdAndUpdate(
+         id,
          { isDeleted: true },
          { new: true, session },
       );
@@ -49,8 +45,8 @@ const deleteSingleFaculty = async (id: string) => {
          throw new Error("Faculty deletion failed");
       }
 
-      const deleteUser = await UserModel.findOneAndUpdate(
-         { id: id },
+      const deleteUser = await UserModel.findByIdAndUpdate(
+         id,
          { isDeleted: true },
          { new: true, session },
       );
