@@ -26,6 +26,26 @@ const facultyValidationSchema = z.object({
    }),
 });
 
+const updateFacultyValidationSchema = z.object({
+   body: z.object({
+      faculty: z.object({
+         name: nameValidationSchema.optional(),
+         gender: z.enum(["male", "female", "other"]).optional(),
+         dateOfBirth: z.string().optional(),
+         email: z.string().email().optional(),
+         contactNumber: z.string().optional(),
+         emergencyContactNumber: z.string().optional(),
+         designation: z.string().optional(),
+         presentAddress: z.string().optional(),
+         permanentAddress: z.string().optional(),
+         profileImage: z.string().optional(),
+         academicFaculty: z.string().optional(),
+         academicDepartment: z.string().optional(),
+      }),
+   }),
+});
+
 export const facultyValidations = {
    createFaculty: facultyValidationSchema,
+   updateFaculty: updateFacultyValidationSchema,
 };

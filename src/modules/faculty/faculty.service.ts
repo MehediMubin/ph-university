@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
 import { UserModel } from "../user/user.model";
+import { TFaculty } from "./faculty.interface";
 import { FacultyModel } from "./faculty.model";
 
 const getAllFaculties = async () => {
@@ -12,18 +13,25 @@ const getSingleFaculty = async (id: string) => {
    return faculty;
 };
 
-const updateSingleFaculty = async (
-   id: string,
-   payload: Record<string, unknown>,
-) => {
-   const updatedFaculty = await FacultyModel.findOneAndUpdate(
+const updateSingleFaculty = async (id: string, payload: Partial<TFaculty>) => {
+   const { name, ...remainingFacultyData } = payload;
+
+   const updatedPayload: Record<string, unknown> = { ...remainingFacultyData };
+
+   if (name && Object.keys(name).length) {
+      for (const [key, value] of Object.entries(name)) {
+         updatedPayload[`name.${key}`] = value;
+      }
+   }
+
+   const result = await FacultyModel.findOneAndUpdate(
       { id: id },
-      payload,
+      updatedPayload,
       {
          new: true,
       },
    );
-   return updatedFaculty;
+   return result;
 };
 
 const deleteSingleFaculty = async (id: string) => {
