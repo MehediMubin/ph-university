@@ -26,7 +26,7 @@ const courseSchema = new Schema<TCourse>(
          required: true,
       },
       code: {
-         type: Number,
+         type: String,
          required: true,
       },
       credit: {

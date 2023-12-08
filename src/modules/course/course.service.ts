@@ -45,12 +45,17 @@ const getSingleCourse = async (id: string) => {
    return result;
 };
 
-// const updateSingleCourse = async (id: string, payload) => {
-//    const result = await CourseModel.findByIdAndUpdate(id, payload, {
-//       new: true,
-//    });
-//    return result;
-// };
+const updateCourse = async (id: string, payload: Partial<TCourse>) => {
+   const { preRequisiteCourses, ...remainingCourseData } = payload;
+
+   const updatedBasicCourseInfo = await CourseModel.findByIdAndUpdate(
+      id,
+      remainingCourseData,
+      { new: true, runValidators: true },
+   );
+
+   return updatedBasicCourseInfo;
+};
 
 const deleteSingleCourse = async (id: string) => {
    const result = await CourseModel.findByIdAndUpdate(
@@ -65,6 +70,6 @@ export const CourseServices = {
    createCourse,
    getAllCourses,
    getSingleCourse,
-   //    updateSingleCourse,
+   updateCourse,
    deleteSingleCourse,
 };
