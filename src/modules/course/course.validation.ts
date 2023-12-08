@@ -7,11 +7,12 @@ const preRequisiteValidationSchema = z.object({
 
 const courseValidationSchema = z.object({
    body: z.object({
-      name: z.string(),
+      title: z.string(),
       prefix: z.string(),
-      code: z.string(),
+      code: z.number(),
       credit: z.number(),
-      preRequisiteCourses: z.array(preRequisiteValidationSchema),
+      preRequisiteCourses: z.array(preRequisiteValidationSchema).optional(),
+      isDeleted: z.boolean().default(false).optional(),
    }),
 });
 

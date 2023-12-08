@@ -13,26 +13,33 @@ const preRequisiteSchema = new Schema<TPrerequisite>({
    },
 });
 
-const courseSchema = new Schema<TCourse>({
-   title: {
-      type: String,
-      required: true,
-      unique: true,
-      trim: true,
+const courseSchema = new Schema<TCourse>(
+   {
+      title: {
+         type: String,
+         required: true,
+         unique: true,
+         trim: true,
+      },
+      prefix: {
+         type: String,
+         required: true,
+      },
+      code: {
+         type: Number,
+         required: true,
+      },
+      credit: {
+         type: Number,
+         required: true,
+      },
+      preRequisiteCourses: [preRequisiteSchema],
+      isDeleted: {
+         type: Boolean,
+         default: false,
+      },
    },
-   prefix: {
-      type: String,
-      required: true,
-   },
-   code: {
-      type: Number,
-      required: true,
-   },
-   credit: {
-      type: Number,
-      required: true,
-   },
-   preRequisiteCourses: [preRequisiteSchema],
-});
+   { timestamps: true },
+);
 
 export const CourseModel = model<TCourse>("Course", courseSchema);

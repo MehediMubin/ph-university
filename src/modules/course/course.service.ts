@@ -1,17 +1,47 @@
+import { CourseSearchableFields } from "./course.constant";
+import { TCourse } from "./course.interface";
 import { CourseModel } from "./course.model";
 
-const createCourse = async () => {
-   const result = await CourseModel.create();
+const createCourse = async (payload: TCourse) => {
+   const result = await CourseModel.create(payload);
    return result;
 };
 
-const getAllCourses = async () => {
-   const result = await CourseModel.find();
+const getAllCourses = async (query: Record<string, unknown>) => {
+   let page = 1;
+   let limit = 0;
+   let skip = 0;
+
+   if (query?.limit) {
+      limit = Number(query.limit);
+   }
+
+   if (query?.page) {
+      page = Number(query.page);
+      skip = (page - 1) * limit;
+   }
+
+   let searchQuery = "";
+   if (query?.search) {
+      searchQuery = query.search as string;
+   }
+
+   const result = await CourseModel.find({
+      $or: CourseSearchableFields.map((field) => ({
+         [field]: { $regex: searchQuery, $options: "i" },
+      })),
+   })
+      .skip(skip)
+      .limit(limit)
+      .populate("preRequisiteCourses.course");
+
    return result;
 };
 
 const getSingleCourse = async (id: string) => {
-   const result = await CourseModel.findById(id);
+   const result = await CourseModel.findById(id).populate(
+      "preRequisiteCourses.course",
+   );
    return result;
 };
 
@@ -35,6 +65,6 @@ export const CourseServices = {
    createCourse,
    getAllCourses,
    getSingleCourse,
-//    updateSingleCourse,
+   //    updateSingleCourse,
    deleteSingleCourse,
 };

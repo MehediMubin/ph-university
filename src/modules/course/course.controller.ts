@@ -3,7 +3,7 @@ import sendResponse from "../../utils/sendResponse";
 import { CourseServices } from "./course.service";
 
 const createCourse = catchAsync(async (req, res) => {
-   const result = await CourseServices.createCourse();
+   const result = await CourseServices.createCourse(req.body);
    sendResponse(res, {
       statusCode: 201,
       success: true,
@@ -13,7 +13,7 @@ const createCourse = catchAsync(async (req, res) => {
 });
 
 const getAllCourses = catchAsync(async (req, res) => {
-   const result = await CourseServices.getAllCourses();
+   const result = await CourseServices.getAllCourses(req.query);
    sendResponse(res, {
       statusCode: 200,
       success: true,
