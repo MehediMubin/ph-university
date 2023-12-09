@@ -1,3 +1,4 @@
+import AppError from "../../errors/AppError";
 import { CourseSearchableFields } from "./course.constant";
 import { TCourse } from "./course.interface";
 import { CourseModel } from "./course.model";
@@ -58,6 +59,10 @@ const updateCourse = async (id: string, payload: Partial<TCourse>) => {
          { new: true, runValidators: true, session },
       );
 
+      if (!updatedBasicCourseInfo) {
+         throw new AppError(500, "Something went wrong");
+      }
+
       if (preRequisiteCourses && preRequisiteCourses.length) {
          // fiter out the deleted fields
          const deletedPrerequisiteCourses = preRequisiteCourses
@@ -76,6 +81,10 @@ const updateCourse = async (id: string, payload: Partial<TCourse>) => {
             { new: true, runValidators: true, session },
          );
 
+         if (!deletedCourses) {
+            throw new AppError(500, "Something went wrong");
+         }
+
          const addedPreRequisiteCourses = preRequisiteCourses.filter(
             (preRequisiteCourse) => !preRequisiteCourse.isDeleted,
          );
@@ -91,6 +100,10 @@ const updateCourse = async (id: string, payload: Partial<TCourse>) => {
             },
             { new: true, runValidators: true, session },
          );
+
+         if (!addedCourses) {
+            throw new AppError(500, "Something went wrong");
+         }
       }
 
       const result = await CourseModel.findById(id).populate(
@@ -103,7 +116,7 @@ const updateCourse = async (id: string, payload: Partial<TCourse>) => {
    } catch (err) {
       await session.abortTransaction();
       session.endSession();
-      throw new Error("Something went wrong");
+      throw new AppError(500, "Something went wrong");
    }
 };
 
