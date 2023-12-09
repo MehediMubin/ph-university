@@ -81,15 +81,10 @@ const updateCourse = async (id: string, payload: Partial<TCourse>) => {
       });
    }
 
-   return updatedBasicCourseInfo;
-};
-
-const deleteSingleCourse = async (id: string) => {
-   const result = await CourseModel.findByIdAndUpdate(
-      id,
-      { isDeleted: true },
-      { new: true },
+   const result = await CourseModel.findById(id).populate(
+      "preRequisiteCourses.course",
    );
+
    return result;
 };
 
