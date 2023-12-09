@@ -88,6 +88,17 @@ const updateCourse = async (id: string, payload: Partial<TCourse>) => {
    return result;
 };
 
+const deleteSingleCourse = async (id: string) => {
+   const result = await CourseModel.findByIdAndUpdate(
+      id,
+      {
+         isDeleted: true,
+      },
+      { new: true },
+   );
+   return result;
+};
+
 export const CourseServices = {
    createCourse,
    getAllCourses,
