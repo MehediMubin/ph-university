@@ -48,44 +48,63 @@ const getSingleCourse = async (id: string) => {
 const updateCourse = async (id: string, payload: Partial<TCourse>) => {
    const { preRequisiteCourses, ...remainingCourseData } = payload;
 
-   const updatedBasicCourseInfo = await CourseModel.findByIdAndUpdate(
-      id,
-      remainingCourseData,
-      { new: true, runValidators: true },
-   );
+   const session = await CourseModel.startSession();
 
-   if (preRequisiteCourses && preRequisiteCourses.length) {
-      // fiter out the deleted fields
-      const deletedPrerequisiteCourses = preRequisiteCourses
-         .filter((preRequisiteCourse) => preRequisiteCourse.isDeleted)
-         .map((preRequisiteCourse) => preRequisiteCourse.course);
-
-      const deletedCourses = await CourseModel.findByIdAndUpdate(id, {
-         $pull: {
-            preRequisiteCourses: {
-               course: { $in: deletedPrerequisiteCourses },
-            },
-         },
-      });
-
-      const addedPreRequisiteCourses = preRequisiteCourses.filter(
-         (preRequisiteCourse) => !preRequisiteCourse.isDeleted,
+   try {
+      session.startTransaction();
+      const updatedBasicCourseInfo = await CourseModel.findByIdAndUpdate(
+         id,
+         remainingCourseData,
+         { new: true, runValidators: true, session },
       );
 
-      const addedCourses = await CourseModel.findByIdAndUpdate(id, {
-         $addToSet: {
-            preRequisiteCourses: {
-               $each: addedPreRequisiteCourses,
+      if (preRequisiteCourses && preRequisiteCourses.length) {
+         // fiter out the deleted fields
+         const deletedPrerequisiteCourses = preRequisiteCourses
+            .filter((preRequisiteCourse) => preRequisiteCourse.isDeleted)
+            .map((preRequisiteCourse) => preRequisiteCourse.course);
+
+         const deletedCourses = await CourseModel.findByIdAndUpdate(
+            id,
+            {
+               $pull: {
+                  preRequisiteCourses: {
+                     course: { $in: deletedPrerequisiteCourses },
+                  },
+               },
             },
-         },
-      });
+            { new: true, runValidators: true, session },
+         );
+
+         const addedPreRequisiteCourses = preRequisiteCourses.filter(
+            (preRequisiteCourse) => !preRequisiteCourse.isDeleted,
+         );
+
+         const addedCourses = await CourseModel.findByIdAndUpdate(
+            id,
+            {
+               $addToSet: {
+                  preRequisiteCourses: {
+                     $each: addedPreRequisiteCourses,
+                  },
+               },
+            },
+            { new: true, runValidators: true, session },
+         );
+      }
+
+      const result = await CourseModel.findById(id).populate(
+         "preRequisiteCourses.course",
+      );
+
+      await session.commitTransaction();
+      session.endSession();
+      return result;
+   } catch (err) {
+      await session.abortTransaction();
+      session.endSession();
+      throw new Error("Something went wrong");
    }
-
-   const result = await CourseModel.findById(id).populate(
-      "preRequisiteCourses.course",
-   );
-
-   return result;
 };
 
 const deleteSingleCourse = async (id: string) => {
