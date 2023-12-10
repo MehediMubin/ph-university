@@ -1,7 +1,7 @@
 import AppError from "../../errors/AppError";
 import { CourseSearchableFields } from "./course.constant";
-import { TCourse } from "./course.interface";
-import { CourseModel } from "./course.model";
+import { TCourse, TCourseFaculty } from "./course.interface";
+import { CourseFacultyModel, CourseModel } from "./course.model";
 
 const createCourse = async (payload: TCourse) => {
    const result = await CourseModel.create(payload);
@@ -120,6 +120,26 @@ const updateCourse = async (id: string, payload: Partial<TCourse>) => {
    }
 };
 
+const assignFaculties = async (
+   courseId: string,
+   payload: Partial<TCourseFaculty>,
+) => {
+   const result = await CourseFacultyModel.findByIdAndUpdate(
+      courseId,
+      {
+         course: courseId,
+         $addToSet: {
+            faculties: {
+               $each: payload.faculties,
+            },
+         },
+      },
+      { upsert: true, new: true, runValidators: true },
+   );
+
+   return result;
+};
+
 const deleteSingleCourse = async (id: string) => {
    const result = await CourseModel.findByIdAndUpdate(
       id,
@@ -136,5 +156,6 @@ export const CourseServices = {
    getAllCourses,
    getSingleCourse,
    updateCourse,
+   assignFaculties,
    deleteSingleCourse,
 };

@@ -15,6 +15,12 @@ router.get("/", CourseController.getAllCourses);
 
 router.get("/:id", CourseController.getSingleCourse);
 
+router.put(
+   "/:courseId/assign-faculties",
+   validateRequest(CourseValidations.assignFaculties),
+   CourseController.assignFaculties,
+);
+
 router.patch(
    "/:id",
    validateRequest(CourseValidations.updateCourse),
