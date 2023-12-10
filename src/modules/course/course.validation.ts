@@ -37,4 +37,5 @@ export const CourseValidations = {
    createCourse: courseValidationSchema,
    updateCourse: updateCourseValidationSchema,
    assignFaculties: courseFacultyValidationSchema,
+   removeFaculties: courseFacultyValidationSchema,
 };
