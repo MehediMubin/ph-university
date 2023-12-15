@@ -13,6 +13,18 @@ const createSemesterRegistration = catchAsync(async (req, res) => {
    });
 });
 
+const getAllSemesterRegistrations = catchAsync(async (req, res) => {
+   const semesterRegistrations =
+      await SemesterRegistrationService.getAllSemesterRegistrations();
+   sendResponse(res, {
+      statusCode: 200,
+      success: true,
+      message: "Semester registrations fetched successfully",
+      data: semesterRegistrations,
+   });
+});
+
 export const SemesterRegistrationController = {
    createSemesterRegistration,
+   getAllSemesterRegistrations,
 };

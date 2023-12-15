@@ -26,6 +26,12 @@ const createSemesterRegistraion = async (payload: TSemesterRegistration) => {
    return semesterRegistration;
 };
 
+const getAllSemesterRegistrations = async () => {
+   const semesterRegistrations = await SemesterRegistrationModel.find();
+   return semesterRegistrations;
+};
+
 export const SemesterRegistrationService = {
    createSemesterRegistraion,
+   getAllSemesterRegistrations,
 };
