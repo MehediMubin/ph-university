@@ -31,12 +31,17 @@ const createOfferedCourseValidationSchema = z.object({
             },
          ),
       })
-      .refine((body) => {
-         const start = new Date(`01/01/2000 ${body.startTime}`);
-         const end = new Date(`01/01/2000 ${body.endTime}`);
+      .refine(
+         (body) => {
+            const start = new Date(`01/01/2000 ${body.startTime}`);
+            const end = new Date(`01/01/2000 ${body.endTime}`);
 
-         return start < end;
-      }),
+            return start < end;
+         },
+         {
+            message: "Start time must be less than end time",
+         },
+      ),
 });
 
 const updateOfferedCourseValidationSchema = z.object({
