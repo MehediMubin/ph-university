@@ -49,8 +49,16 @@ const getSingleSemesterRegistration = async (id: string) => {
    return semesterRegistration;
 };
 
+const updateSemesterRegistration = async (
+   id: string,
+   payload: Partial<TSemesterRegistration>,
+) => {
+    
+};
+
 export const SemesterRegistrationService = {
    createSemesterRegistraion,
    getAllSemesterRegistrations,
    getSingleSemesterRegistration,
+   updateSemesterRegistration,
 };
