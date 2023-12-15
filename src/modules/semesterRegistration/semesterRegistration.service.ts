@@ -1,5 +1,6 @@
 import AppError from "../../errors/AppError";
 import { AcademicSemesterModel } from "../academicSemester/academicSemester.model";
+import { SemesterRegistrationStatus } from "./semesterRegistration.constant";
 import { TSemesterRegistration } from "./semesterRegistration.interface";
 import { SemesterRegistrationModel } from "./semesterRegistration.model";
 
@@ -7,7 +8,10 @@ const createSemesterRegistraion = async (payload: TSemesterRegistration) => {
    // check if there is a semester registration which has status upcoming or ongoing
    const isSemesterRegistrationWithStatusExists =
       await SemesterRegistrationModel.findOne({
-         $or: [{ status: "upcoming" }, { status: "ongoing" }],
+         $or: [
+            { status: SemesterRegistrationStatus.UPCOMING },
+            { status: SemesterRegistrationStatus.ONGOING },
+         ],
       });
 
    if (isSemesterRegistrationWithStatusExists) {
@@ -75,7 +79,7 @@ const updateSemesterRegistration = async (
 
    // if the requested semester registration is ended, then it can't be updated
    const currentSemesterStatus = isSemesterRegistrationExists?.status;
-   if (currentSemesterStatus === "ended") {
+   if (currentSemesterStatus === SemesterRegistrationStatus.ENDED) {
       throw new AppError(
          400,
          "This semester is ended. So, it can't be updated",
@@ -84,15 +88,15 @@ const updateSemesterRegistration = async (
 
    const requestedSemesterStatus = payload?.status;
    if (
-      currentSemesterStatus === "upcoming" &&
-      requestedSemesterStatus === "ended"
+      currentSemesterStatus === SemesterRegistrationStatus.UPCOMING &&
+      requestedSemesterStatus === SemesterRegistrationStatus.ENDED
    ) {
       throw new AppError(400, "Upcoming semester can't be ended");
    }
 
    if (
-      currentSemesterStatus === "ongoing" &&
-      requestedSemesterStatus === "upcoming"
+      currentSemesterStatus === SemesterRegistrationStatus.ONGOING &&
+      requestedSemesterStatus === SemesterRegistrationStatus.UPCOMING
    ) {
       throw new AppError(400, "Ongoing semester can't be changed to upcoming");
    }
