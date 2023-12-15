@@ -4,6 +4,19 @@ import { TSemesterRegistration } from "./semesterRegistration.interface";
 import { SemesterRegistrationModel } from "./semesterRegistration.model";
 
 const createSemesterRegistraion = async (payload: TSemesterRegistration) => {
+   // check if there is a semester registration which has status upcoming or ongoing
+   const isSemesterRegistrationWithStatusExists =
+      await SemesterRegistrationModel.findOne({
+         $or: [{ status: "upcoming" }, { status: "ongoing" }],
+      });
+
+   if (isSemesterRegistrationWithStatusExists) {
+      throw new AppError(
+         400,
+         "There is a semester registration which has status upcoming or ongoing",
+      );
+   }
+
    // check if academic semester already exists
    const academicSemester = payload?.academicSemester;
    if (academicSemester) {
@@ -52,9 +65,7 @@ const getSingleSemesterRegistration = async (id: string) => {
 const updateSemesterRegistration = async (
    id: string,
    payload: Partial<TSemesterRegistration>,
-) => {
-    
-};
+) => {};
 
 export const SemesterRegistrationService = {
    createSemesterRegistraion,
