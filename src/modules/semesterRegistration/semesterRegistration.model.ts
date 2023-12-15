@@ -6,7 +6,7 @@ const semesterRegistrationSchema = new Schema<TSemesterRegistration>(
       academicSemester: {
          type: Schema.Types.ObjectId,
          unique: true,
-         ref: "AcademicSemester",
+         ref: "academicSemester",
          required: true,
       },
       status: {

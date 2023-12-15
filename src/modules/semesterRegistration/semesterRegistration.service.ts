@@ -38,11 +38,19 @@ const getAllSemesterRegistrations = async (query: Record<string, unknown>) => {
    const semesterRegistrations = await SemesterRegistrationModel.find()
       .find(queryObject)
       .skip(skip)
-      .limit(limit);
+      .limit(limit)
+      .populate("academicSemester");
    return semesterRegistrations;
+};
+
+const getSingleSemesterRegistration = async (id: string) => {
+   const semesterRegistration =
+      await SemesterRegistrationModel.findById(id).populate("academicSemester");
+   return semesterRegistration;
 };
 
 export const SemesterRegistrationService = {
    createSemesterRegistraion,
    getAllSemesterRegistrations,
+   getSingleSemesterRegistration,
 };

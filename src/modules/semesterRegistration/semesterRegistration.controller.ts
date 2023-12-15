@@ -24,7 +24,21 @@ const getAllSemesterRegistrations = catchAsync(async (req, res) => {
    });
 });
 
+const getSingleSemesterRegistration = catchAsync(async (req, res) => {
+   const semesterRegistration =
+      await SemesterRegistrationService.getSingleSemesterRegistration(
+         req.params.id,
+      );
+   sendResponse(res, {
+      statusCode: 200,
+      success: true,
+      message: "Semester registration fetched successfully",
+      data: semesterRegistration,
+   });
+});
+
 export const SemesterRegistrationController = {
    createSemesterRegistration,
    getAllSemesterRegistrations,
+   getSingleSemesterRegistration,
 };
