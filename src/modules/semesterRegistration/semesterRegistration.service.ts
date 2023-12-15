@@ -65,7 +65,45 @@ const getSingleSemesterRegistration = async (id: string) => {
 const updateSemesterRegistration = async (
    id: string,
    payload: Partial<TSemesterRegistration>,
-) => {};
+) => {
+   // check if semester registration already exists
+   const isSemesterRegistrationExists =
+      await SemesterRegistrationModel.findById(id);
+   if (!isSemesterRegistrationExists) {
+      throw new AppError(404, "Semester not found");
+   }
+
+   // if the requested semester registration is ended, then it can't be updated
+   const currentSemesterStatus = isSemesterRegistrationExists?.status;
+   if (currentSemesterStatus === "ended") {
+      throw new AppError(
+         400,
+         "This semester is ended. So, it can't be updated",
+      );
+   }
+
+   const requestedSemesterStatus = payload?.status;
+   if (
+      currentSemesterStatus === "upcoming" &&
+      requestedSemesterStatus === "ended"
+   ) {
+      throw new AppError(400, "Upcoming semester can't be ended");
+   }
+
+   if (
+      currentSemesterStatus === "ongoing" &&
+      requestedSemesterStatus === "upcoming"
+   ) {
+      throw new AppError(400, "Ongoing semester can't be changed to upcoming");
+   }
+
+   const result = await SemesterRegistrationModel.findByIdAndUpdate(
+      id,
+      payload,
+      { new: true, runValidators: true },
+   );
+   return result;
+};
 
 export const SemesterRegistrationService = {
    createSemesterRegistraion,
