@@ -26,8 +26,19 @@ const createSemesterRegistraion = async (payload: TSemesterRegistration) => {
    return semesterRegistration;
 };
 
-const getAllSemesterRegistrations = async () => {
-   const semesterRegistrations = await SemesterRegistrationModel.find();
+const getAllSemesterRegistrations = async (query: Record<string, unknown>) => {
+   const page = Number(query.page) || 1;
+   const limit = Number(query.limit) || 0;
+   const skip = (page - 1) * limit;
+
+   const queryObject = { ...query };
+   const excludeFields = ["search", "sort", "limit", "page", "fields"];
+   excludeFields.forEach((field) => delete queryObject[field]);
+
+   const semesterRegistrations = await SemesterRegistrationModel.find()
+      .find(queryObject)
+      .skip(skip)
+      .limit(limit);
    return semesterRegistrations;
 };
 
