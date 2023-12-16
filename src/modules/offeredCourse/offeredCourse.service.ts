@@ -81,9 +81,51 @@ const createOfferedCourse = async (payload: TOfferedCourse) => {
    return result;
 };
 
-const updateOfferedCourse = async (id: string, payload: Partial<TOfferedCourse>) => {
-   
-}
+const updateOfferedCourse = async (
+   id: string,
+   payload: Partial<TOfferedCourse>,
+) => {
+   const { faculty } = payload;
+   const days = payload.days || [];
+   const startTime = payload.startTime || "";
+   const endTime = payload.endTime || "";
+
+   const isOfferedCourseExists = await OfferedCourseModel.findById(id);
+   if (!isOfferedCourseExists)
+      throw new AppError(404, "OfferedCourse does not exist");
+
+   const semesterRegistration = isOfferedCourseExists.semesterRegistration;
+   const semesterRegistrationStatus =
+      await SemesterRegistrationModel.findById(semesterRegistration);
+
+   if (semesterRegistrationStatus?.status !== "upcoming") {
+      throw new AppError(
+         400,
+         "Cannot update Offered Course that is not upcoming",
+      );
+   }
+
+   const isFacultyExists = FacultyModel.findById(faculty);
+   if (!isFacultyExists) throw new AppError(404, "Faculty does not exist");
+
+   const facultySchedules = await OfferedCourseModel.find({
+      _id: { $ne: id },
+      faculty,
+      days: { $in: days },
+   }).select("days startTime endTime");
+
+   const newSchedule = { days, startTime, endTime };
+   if (hasTimeConflict(facultySchedules, newSchedule)) {
+      throw new AppError(400, "Faculty has schedule conflict");
+   }
+
+   const result = await OfferedCourseModel.findByIdAndUpdate(id, payload, {
+      new: true,
+      runValidators: true,
+   });
+
+   return result;
+};
 
 export const OfferedCourseService = {
    createOfferedCourse,
