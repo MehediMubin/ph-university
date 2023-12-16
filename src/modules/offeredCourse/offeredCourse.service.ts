@@ -7,6 +7,7 @@ import { FacultyModel } from "../faculty/faculty.model";
 import { SemesterRegistrationModel } from "../semesterRegistration/semesterRegistration.model";
 import { TOfferedCourse } from "./offeredCourse.interface";
 import { OfferedCourseModel } from "./offeredCourse.model";
+import hasTimeConflict from "./offeredCourse.utils";
 
 const createOfferedCourse = async (payload: TOfferedCourse) => {
    // check if semester registration exists
@@ -66,26 +67,12 @@ const createOfferedCourse = async (payload: TOfferedCourse) => {
    }).select("days startTime endTime");
 
    // check if the faculty has schedule conflict with the new schedule
-   const { startTime, endTime } = payload;
+   const { days, startTime, endTime } = payload;
+   const newSchedule = { days, startTime, endTime };
 
-   facultySchedules.forEach((schedule) => {
-      const existingStartTime = new Date(schedule.startTime);
-      const existingEndTime = new Date(schedule.endTime);
-
-      const newStartTime = new Date(startTime);
-      const newEndTime = new Date(endTime);
-
-      if (
-         (newStartTime >= existingStartTime &&
-            newStartTime <= existingEndTime) ||
-         (newEndTime >= existingStartTime && newEndTime <= existingEndTime)
-      ) {
-         throw new AppError(
-            400,
-            "Faculty has schedule conflict with the new schedule",
-         );
-      }
-   });
+   if (hasTimeConflict(facultySchedules, newSchedule)) {
+      throw new AppError(400, "Faculty has schedule conflict");
+   }
 
    const result = await OfferedCourseModel.create({
       ...payload,
