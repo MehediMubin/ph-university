@@ -81,6 +81,11 @@ const createOfferedCourse = async (payload: TOfferedCourse) => {
    return result;
 };
 
+const updateOfferedCourse = async (id: string, payload: Partial<TOfferedCourse>) => {
+   
+}
+
 export const OfferedCourseService = {
    createOfferedCourse,
+   updateOfferedCourse,
 };
