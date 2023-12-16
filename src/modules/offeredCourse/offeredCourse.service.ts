@@ -39,6 +39,54 @@ const createOfferedCourse = async (payload: TOfferedCourse) => {
    const isFacultyExists = await FacultyModel.findById(payload.faculty);
    if (!isFacultyExists) throw new AppError(404, "Faculty does not exist");
 
+   //    check if the department is belong to faculty
+   const isDepartmentBelongToFaculty = await AcademicDepartmentModel.findOne({
+      _id: payload.academicDepartment,
+      academicFaculty: payload.academicFaculty,
+   });
+
+   if (!isDepartmentBelongToFaculty)
+      throw new AppError(400, "Department does not belong to faculty");
+
+   // check if the same section already exists
+   const isSectionExists = await OfferedCourseModel.findOne({
+      academicSemester,
+      course: payload.course,
+      section: payload.section,
+   });
+
+   if (isSectionExists)
+      throw new AppError(400, "Section for this course already exists");
+
+   // get the schedules of the faculties
+   const facultySchedules = await OfferedCourseModel.find({
+      academicSemester,
+      faculty: payload.faculty,
+      days: { $in: payload.days },
+   }).select("days startTime endTime");
+
+   // check if the faculty has schedule conflict with the new schedule
+   const { startTime, endTime } = payload;
+
+   facultySchedules.forEach((schedule) => {
+      const existingStartTime = new Date(schedule.startTime);
+      const existingEndTime = new Date(schedule.endTime);
+
+      const newStartTime = new Date(startTime);
+      const newEndTime = new Date(endTime);
+
+      if (
+         (newStartTime >= existingStartTime &&
+            newStartTime <= existingEndTime) ||
+         (newEndTime >= existingStartTime && newEndTime <= existingEndTime)
+      ) {
+         throw new AppError(
+            400,
+            "Faculty has schedule conflict with the new schedule",
+         );
+      }
+   });
+
    const result = await OfferedCourseModel.create({
       ...payload,
       academicSemester,
