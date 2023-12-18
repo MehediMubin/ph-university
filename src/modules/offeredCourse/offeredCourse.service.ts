@@ -1,7 +1,6 @@
 import AppError from "../../errors/AppError";
 import { AcademicDepartmentModel } from "../academicDepartment/academicDepartment.model";
 import { AcademicFacultyModel } from "../academicFaculty/academicFaculty.model";
-import { AcademicSemesterModel } from "../academicSemester/academicSemester.model";
 import { CourseModel } from "../course/course.model";
 import { FacultyModel } from "../faculty/faculty.model";
 import { SemesterRegistrationModel } from "../semesterRegistration/semesterRegistration.model";
