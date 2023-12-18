@@ -137,8 +137,22 @@ const getAllOfferedCourses = async () => {
    return result;
 };
 
+const getSingleOfferedCourse = async (id: string) => {
+   const result = await OfferedCourseModel.findById(id)
+      .populate("semesterRegistration")
+      .populate("academicSemester")
+      .populate("academicFaculty")
+      .populate("academicDepartment")
+      .populate("course")
+      .populate("faculty");
+
+   if (!result) throw new AppError(404, "OfferedCourse does not exist");
+   return result;
+};
+
 export const OfferedCourseService = {
    createOfferedCourse,
    updateOfferedCourse,
    getAllOfferedCourses,
+   getSingleOfferedCourse,
 };

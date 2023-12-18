@@ -35,8 +35,21 @@ const getAllOfferedCourses = catchAsync(async (req, res) => {
    });
 });
 
+const getSingleOfferedCourse = catchAsync(async (req, res) => {
+   const result = await OfferedCourseService.getSingleOfferedCourse(
+      req.params.id,
+   );
+   sendResponse(res, {
+      statusCode: 200,
+      success: true,
+      message: "Successfully fetched single offeredCourse",
+      data: result,
+   });
+});
+
 export const OfferedCourseController = {
    createOfferedCourse,
    updateOfferedCourse,
    getAllOfferedCourses,
+   getSingleOfferedCourse,
 };
