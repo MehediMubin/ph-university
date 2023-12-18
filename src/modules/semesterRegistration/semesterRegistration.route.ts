@@ -18,6 +18,15 @@ router.get(
    SemesterRegistrationController.getSingleSemesterRegistration,
 );
 
-router.patch('/:id', validateRequest(SemesterRegistrationValidations.update), SemesterRegistrationController.updateSemesterRegistration);
+router.patch(
+   "/:id",
+   validateRequest(SemesterRegistrationValidations.update),
+   SemesterRegistrationController.updateSemesterRegistration,
+);
+
+router.delete(
+   "/:id",
+   SemesterRegistrationController.deleteSemesterRegistration,
+);
 
 export const semesterRegistrationRoutes = router;

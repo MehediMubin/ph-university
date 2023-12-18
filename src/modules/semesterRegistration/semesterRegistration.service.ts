@@ -1,5 +1,7 @@
+import mongoose from "mongoose";
 import AppError from "../../errors/AppError";
 import { AcademicSemesterModel } from "../academicSemester/academicSemester.model";
+import { OfferedCourseModel } from "../offeredCourse/offeredCourse.model";
 import { SemesterRegistrationStatus } from "./semesterRegistration.constant";
 import { TSemesterRegistration } from "./semesterRegistration.interface";
 import { SemesterRegistrationModel } from "./semesterRegistration.model";
@@ -109,9 +111,51 @@ const updateSemesterRegistration = async (
    return result;
 };
 
+const deleteSemesterRegistration = async (id: string) => {
+   const session = await mongoose.startSession();
+   try {
+      session.startTransaction();
+
+      const semesterRegistration = await SemesterRegistrationModel.findById(
+         id,
+         {
+            session,
+         },
+      );
+      if (!semesterRegistration) {
+         throw new AppError(404, "Semester registration not found");
+      }
+
+      const semesterRegistrationStatus = semesterRegistration?.status;
+      if (semesterRegistrationStatus !== "upcoming") {
+         throw new AppError(
+            400,
+            "Cannot delete semester registration that is not upcoming",
+         );
+      }
+
+      await OfferedCourseModel.deleteMany(
+         { semesterRegistration: id },
+         { session },
+      );
+      const result = await SemesterRegistrationModel.findByIdAndDelete(id, {
+         session,
+      });
+
+      await session.commitTransaction();
+      session.endSession();
+      return result;
+   } catch (err) {
+      await session.abortTransaction();
+      session.endSession();
+      throw new AppError(500, "Internal server error");
+   }
+};
+
 export const SemesterRegistrationService = {
    createSemesterRegistraion,
    getAllSemesterRegistrations,
    getSingleSemesterRegistration,
    updateSemesterRegistration,
+   deleteSemesterRegistration,
 };
