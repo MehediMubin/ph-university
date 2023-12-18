@@ -150,9 +150,28 @@ const getSingleOfferedCourse = async (id: string) => {
    return result;
 };
 
+const deleteOfferedCourse = async (id: string) => {
+   const offeredCourse = await OfferedCourseModel.findById(id);
+   if (!offeredCourse) throw new AppError(404, "OfferedCourse does not exist");
+
+   const semesterRegistration = offeredCourse.semesterRegistration;
+   const semesterRegistrationStatus =
+      await SemesterRegistrationModel.findById(semesterRegistration);
+   if (semesterRegistrationStatus?.status !== "upcoming") {
+      throw new AppError(
+         400,
+         "Cannot delete Offered Course that is not upcoming",
+      );
+   }
+
+   const result = await OfferedCourseModel.findByIdAndDelete(id);
+   return result;
+};
+
 export const OfferedCourseService = {
    createOfferedCourse,
    updateOfferedCourse,
    getAllOfferedCourses,
    getSingleOfferedCourse,
+   deleteOfferedCourse,
 };

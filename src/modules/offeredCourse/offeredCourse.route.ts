@@ -21,4 +21,6 @@ router.get("/", OfferedCourseController.getAllOfferedCourses);
 
 router.get("/:id", OfferedCourseController.getSingleOfferedCourse);
 
+router.delete("/:id", OfferedCourseController.deleteOfferedCourse);
+
 export const OfferedCourseRoutes = router;
