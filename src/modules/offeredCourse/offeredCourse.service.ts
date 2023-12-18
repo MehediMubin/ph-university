@@ -126,7 +126,19 @@ const updateOfferedCourse = async (
    return result;
 };
 
+const getAllOfferedCourses = async () => {
+   const result = await OfferedCourseModel.find()
+      .populate("semesterRegistration")
+      .populate("academicSemester")
+      .populate("academicFaculty")
+      .populate("academicDepartment")
+      .populate("course")
+      .populate("faculty");
+   return result;
+};
+
 export const OfferedCourseService = {
    createOfferedCourse,
    updateOfferedCourse,
+   getAllOfferedCourses,
 };
