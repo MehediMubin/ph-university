@@ -20,4 +20,5 @@ export interface TUserModel extends Model<TUser> {
       password: string,
       hashedPassword: string,
    ): Promise<boolean>;
+   isJWTValid(passwordChangedAt: Date, tokenIssuedAt: number): boolean;
 }

@@ -67,4 +67,12 @@ userSchema.statics.isPasswordMatched = async function (
    return result;
 };
 
+userSchema.statics.isJWTValid = function (
+   passwordChangedAt: Date,
+   tokenIssuedAt: number,
+) {
+   const passwordChangedAtInSec = passwordChangedAt.getTime() / 1000;
+   return tokenIssuedAt < passwordChangedAtInSec;
+};
+
 export const UserModel = model<TUser, TUserModel>("User", userSchema);
