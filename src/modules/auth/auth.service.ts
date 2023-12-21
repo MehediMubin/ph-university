@@ -2,9 +2,9 @@ import bcrypt from "bcrypt";
 import jwt, { JwtPayload } from "jsonwebtoken";
 import config from "../../config";
 import AppError from "../../errors/AppError";
+import { sendEmail } from "../../utils/sendEmail";
 import { UserModel } from "../user/user.model";
 import { createToken } from "./auth.utils";
-import { sendEmail } from "../../utils/sendEmail";
 
 const loginUser = async (id: string, password: string) => {
    const user = await UserModel.isUserExistsById(id);
@@ -129,13 +129,60 @@ const forgetPassword = async (id: string) => {
    const resetToken = createToken(
       jwtPayload,
       config.jwt_access_secret as string,
-      '10m',
+      "10m",
    );
 
    const resetUILink = `${config.reset_pass_link}?id=${id}&token=${resetToken}`;
    sendEmail(user.email, resetUILink);
+};
 
-   console.log(resetUILink);
+const resetPassword = async (
+   payload: { id: string; newPassword: string },
+   token: string,
+) => {
+   const { id, newPassword } = payload;
+   const user = await UserModel.isUserExistsById(id);
+   if (!user) {
+      throw new AppError(404, "User not found");
+   }
+
+   // check if the user is deleted or not
+   if (user.isDeleted) {
+      throw new AppError(403, "User is deleted");
+   }
+
+   // check if the user is blocked or not
+   if (user.status === "blocked") {
+      throw new AppError(403, "User is blocked");
+   }
+
+   const decoded = jwt.verify(
+      token,
+      config.jwt_access_secret as string,
+   ) as JwtPayload;
+
+   if (decoded.id !== id) {
+      throw new AppError(403, "Invalid token");
+   }
+
+   const newHashedPassword = bcrypt.hashSync(
+      newPassword,
+      Number(config.bcrypt_salt),
+   );
+
+   await UserModel.findOneAndUpdate(
+      {
+         id: decoded.id,
+         role: decoded.role,
+      },
+      {
+         password: newHashedPassword,
+         needsPasswordChange: false,
+         passwordChangedAt: new Date(),
+      },
+   );
+
+   return null;
 };
 
 const refreshToken = async (refreshToken: string) => {
@@ -192,4 +239,5 @@ export const AuthService = {
    changePassword,
    refreshToken,
    forgetPassword,
+   resetPassword,
 };
