@@ -4,6 +4,7 @@ import config from "../../config";
 import AppError from "../../errors/AppError";
 import { UserModel } from "../user/user.model";
 import { createToken } from "./auth.utils";
+import { sendEmail } from "../../utils/sendEmail";
 
 const loginUser = async (id: string, password: string) => {
    const user = await UserModel.isUserExistsById(id);
@@ -103,6 +104,40 @@ const changePassword = async (
    return null;
 };
 
+const forgetPassword = async (id: string) => {
+   const user = await UserModel.isUserExistsById(id);
+   if (!user) {
+      throw new AppError(404, "User not found");
+   }
+
+   // check if the user is deleted or not
+   if (user.isDeleted) {
+      throw new AppError(403, "User is deleted");
+   }
+
+   // check if the user is blocked or not
+   if (user.status === "blocked") {
+      throw new AppError(403, "User is blocked");
+   }
+
+   const jwtPayload = {
+      id: user.id,
+      role: user.role,
+   };
+
+   // create jwt token and sent to the user
+   const resetToken = createToken(
+      jwtPayload,
+      config.jwt_access_secret as string,
+      '10m',
+   );
+
+   const resetUILink = `${config.reset_pass_link}?id=${id}&token=${resetToken}`;
+   sendEmail(user.email, resetUILink);
+
+   console.log(resetUILink);
+};
+
 const refreshToken = async (refreshToken: string) => {
    const decoded = jwt.verify(
       refreshToken,
@@ -156,4 +191,5 @@ export const AuthService = {
    loginUser,
    changePassword,
    refreshToken,
+   forgetPassword,
 };
