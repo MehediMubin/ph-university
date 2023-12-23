@@ -4,7 +4,7 @@ import config from "../../config";
 import AppError from "../../errors/AppError";
 import { sendEmail } from "../../utils/sendEmail";
 import { UserModel } from "../user/user.model";
-import { createToken } from "./auth.utils";
+import { createToken, verifyToken } from "./auth.utils";
 
 const loginUser = async (id: string, password: string) => {
    const user = await UserModel.isUserExistsById(id);
@@ -186,7 +186,7 @@ const resetPassword = async (
 };
 
 const refreshToken = async (refreshToken: string) => {
-   const decoded = jwt.verify(
+   const decoded = verifyToken(
       refreshToken,
       config.jwt_refresh_secret as string,
    ) as JwtPayload;

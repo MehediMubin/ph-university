@@ -1,8 +1,10 @@
+import { JwtPayload, jwt } from "jsonwebtoken";
 import mongoose from "mongoose";
 import config from "../../config";
 import AppError from "../../errors/AppError";
 import { AcademicSemesterModel } from "../academicSemester/academicSemester.model";
 import { AdminModel } from "../admin/admin.model";
+import { verifyToken } from "../auth/auth.utils";
 import { FacultyModel } from "../faculty/faculty.model";
 import { StudentModel } from "../student/student.model";
 import { TUser } from "./user.interface";
@@ -136,8 +138,38 @@ const createAdmin = async (password: string, payload) => {
    }
 };
 
+const getMe = async (payload: JwtPayload) => {
+   const { id, role } = payload;
+
+   let result = null;
+   if (role === "student") {
+      result = await StudentModel.findOne({ id }).populate("user");
+   } else if (role === "admin") {
+      result = await AdminModel.findOne({ id }).populate("user");
+   } else if (role === "faculty") {
+      result = await FacultyModel.findOne({ id }).populate("user");
+   }
+
+   if (!result) {
+      throw new AppError(404, "User not found");
+   }
+
+   return result;
+};
+
+const changeStatus = async (id: string, status: string) => {
+   const result = await UserModel.findOneAndUpdate(
+      { id },
+      { status },
+      { new: true },
+   );
+   return result;
+};
+
 export const UserServices = {
    createStudent,
    createFaculty,
    createAdmin,
+   getMe,
+   changeStatus,
 };

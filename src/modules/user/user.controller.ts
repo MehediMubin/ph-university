@@ -1,3 +1,4 @@
+import AppError from "../../errors/AppError";
 import catchAsync from "../../utils/catchAsync";
 import sendResponse from "../../utils/sendResponse";
 import { UserServices } from "./user.service";
@@ -40,8 +41,33 @@ const createAdmin = catchAsync(async (req, res) => {
    });
 });
 
+const getMe = catchAsync(async (req, res) => {
+   const result = await UserServices.getMe(req.user);
+   sendResponse(res, {
+      statusCode: 200,
+      success: true,
+      message: "User details",
+      data: result,
+   });
+});
+
+const changeStatus = catchAsync(async (req, res) => {
+   const { id } = req.params;
+   const { status } = req.body;
+
+   const result = await UserServices.changeStatus(id, status);
+   sendResponse(res, {
+      statusCode: 200,
+      success: true,
+      message: "User status updated",
+      data: result,
+   });
+});
+
 export const UserController = {
    createStudent,
    createFaculty,
    createAdmin,
+   getMe,
+   changeStatus,
 };
