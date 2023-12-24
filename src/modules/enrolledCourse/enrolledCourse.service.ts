@@ -1,8 +1,10 @@
 import { JwtPayload } from "jsonwebtoken";
 import mongoose from "mongoose";
 import AppError from "../../errors/AppError";
+import { CourseModel } from "../course/course.model";
 import { OfferedCourseModel } from "../offeredCourse/offeredCourse.model";
 import { StudentModel } from "../student/student.model";
+import { SemesterRegistrationModel } from "./../semesterRegistration/semesterRegistration.model";
 import { TEnrolledCourse } from "./enrolledCourse.interface";
 import { EnrolledCourseModel } from "./enrolledCourse.model";
 
@@ -38,6 +40,42 @@ const createEnrolledCourse = async (
       if (isEnrolledCourseExists)
          throw new AppError(400, "You are already enrolled in this course");
 
+      const semesterRegistration = await SemesterRegistrationModel.findById(
+         isOfferedCourseExists.semesterRegistration,
+      ).select("maxCredit");
+
+      // check if student's credit is greater than max credit
+      const enrolledCourses = await EnrolledCourseModel.aggregate([
+         {
+            $match: {
+               student: student._id,
+               isEnrolled: true,
+            },
+         },
+         {
+            $lookup: {
+               from: "courses",
+               localField: "course",
+               foreignField: "_id",
+               as: "course",
+            },
+         },
+         {
+            $unwind: "$course",
+         },
+         {
+            $group: {
+               _id: null,
+               totalCredit: { $sum: "$course.credit" },
+            },
+         },
+      ]);
+
+      const course = await CourseModel.findById(isOfferedCourseExists.course);
+      if (!course) throw new AppError(404, "Course not found");
+
+      const totalCredits = enrolledCourses[0].totalCredit + course.credit;
+
       payload.semesterRegistration = isOfferedCourseExists.semesterRegistration;
       payload.academicSemester = isOfferedCourseExists.academicSemester;
       payload.academicFaculty = isOfferedCourseExists.academicFaculty;
@@ -46,6 +84,13 @@ const createEnrolledCourse = async (
       payload.student = student._id;
       payload.faculty = isOfferedCourseExists.faculty;
       payload.isEnrolled = true;
+
+      if (
+         semesterRegistration &&
+         totalCredits > semesterRegistration.maxCredit
+      ) {
+         throw new AppError(400, "You have exceeded your max credit");
+      }
 
       // create enrolled course
       const result = await EnrolledCourseModel.create([payload], { session });
@@ -64,7 +109,7 @@ const createEnrolledCourse = async (
    } catch (error) {
       await session.abortTransaction();
       session.endSession();
-      throw error; // rethrow the error
+      throw error;
    }
 };
 
