@@ -69,7 +69,7 @@ const createStudent = async (imageFile, password: string, payload) => {
    }
 };
 
-const createFaculty = async (password: string, payload) => {
+const createFaculty = async (imageFile, password: string, payload) => {
    // console.log(payload);
    const user: Partial<TUser> = {};
 
@@ -81,6 +81,14 @@ const createFaculty = async (password: string, payload) => {
    try {
       session.startTransaction();
       user.id = await generateFacultyId();
+
+      const imageName = `${user.id}-${payload?.name?.firstName}`;
+      const { secure_url } = await sendImageToCloudinary(
+         imageName,
+         imageFile.path,
+      );
+
+      payload.profileImage = secure_url;
 
       const newUser = await UserModel.create([user], { session });
 
