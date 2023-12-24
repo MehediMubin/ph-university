@@ -1,10 +1,10 @@
-import { JwtPayload, jwt } from "jsonwebtoken";
+import { JwtPayload } from "jsonwebtoken";
 import mongoose from "mongoose";
 import config from "../../config";
 import AppError from "../../errors/AppError";
+import { sendImageToCloudinary } from "../../utils/sendImageToCloudinary";
 import { AcademicSemesterModel } from "../academicSemester/academicSemester.model";
 import { AdminModel } from "../admin/admin.model";
-import { verifyToken } from "../auth/auth.utils";
 import { FacultyModel } from "../faculty/faculty.model";
 import { StudentModel } from "../student/student.model";
 import { TUser } from "./user.interface";
@@ -15,7 +15,7 @@ import {
    generateStudentId,
 } from "./user.utils";
 
-const createStudent = async (password: string, payload) => {
+const createStudent = async (imageFile, password: string, payload) => {
    const user: Partial<TUser> = {};
 
    user.password = password || (config.default_password as string);
@@ -31,6 +31,14 @@ const createStudent = async (password: string, payload) => {
    try {
       session.startTransaction();
       user.id = await generateStudentId(admissionSemester);
+
+      const imageName = `${user.id}-${payload?.name?.firstName}`;
+      const { secure_url } = await sendImageToCloudinary(
+         imageName,
+         imageFile.path,
+      );
+
+      payload.profileImage = secure_url;
 
       // transaction 1
       const newUser = await UserModel.create([user], { session });

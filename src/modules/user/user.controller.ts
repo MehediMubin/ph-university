@@ -6,7 +6,7 @@ import { UserServices } from "./user.service";
 const createStudent = catchAsync(async (req, res) => {
    const { password, student } = req.body;
 
-   const result = await UserServices.createStudent(password, student);
+   const result = await UserServices.createStudent(req.file, password, student);
    sendResponse(res, {
       statusCode: 201,
       success: true,
