@@ -116,7 +116,7 @@ const createFaculty = async (imageFile, password: string, payload) => {
    }
 };
 
-const createAdmin = async (password: string, payload) => {
+const createAdmin = async (imageFile, password: string, payload) => {
    const user: Partial<TUser> = {};
 
    user.password = password || (config.default_password as string);
@@ -127,6 +127,14 @@ const createAdmin = async (password: string, payload) => {
    try {
       session.startTransaction();
       user.id = await generateAdminId();
+
+      const imageName = `${user.id}-${payload?.name?.firstName}`;
+      const { secure_url } = await sendImageToCloudinary(
+         imageName,
+         imageFile.path,
+      );
+
+      payload.profileImage = secure_url;
 
       const newUser = await UserModel.create([user], { session });
 

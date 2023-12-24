@@ -32,7 +32,7 @@ const createAdmin = catchAsync(async (req, res) => {
    const { password, admin } = req.body;
    // console.log(admin);
 
-   const result = await UserServices.createAdmin(password, admin);
+   const result = await UserServices.createAdmin(req.file, password, admin);
    sendResponse(res, {
       statusCode: 201,
       success: true,
