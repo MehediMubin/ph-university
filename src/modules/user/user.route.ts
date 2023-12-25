@@ -49,7 +49,7 @@ router.post(
 
 router.get("/me", auth("admin", "faculty", "student"), UserController.getMe);
 
-router.put(
+router.post(
    "/change-status/:id",
    auth("admin"),
    validateRequest(UserValidations.changeStatusValidationSchema),
