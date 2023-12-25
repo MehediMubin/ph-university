@@ -142,20 +142,13 @@ const updateEnrolledCourseMarks = async (
    if (!faculty) {
       throw new AppError(404, "Faculty not found");
    }
-   console.log(faculty._id);
-
-   const isFacultyExists = await EnrolledCourseModel.findOne({
-      faculty: faculty._id,
-   });
-   if (!isFacultyExists) {
-      throw new AppError(404, "Faculty not found");
-   }
 
    const result = await EnrolledCourseModel.findOneAndUpdate(
       {
          semesterRegistration,
          offeredCourse,
          student,
+         faculty: faculty._id,
       },
       {
          courseMarks,
