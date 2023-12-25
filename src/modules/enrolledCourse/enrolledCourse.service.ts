@@ -2,6 +2,7 @@ import { JwtPayload } from "jsonwebtoken";
 import mongoose from "mongoose";
 import AppError from "../../errors/AppError";
 import { CourseModel } from "../course/course.model";
+import { FacultyModel } from "../faculty/faculty.model";
 import { OfferedCourseModel } from "../offeredCourse/offeredCourse.model";
 import { StudentModel } from "../student/student.model";
 import { SemesterRegistrationModel } from "./../semesterRegistration/semesterRegistration.model";
@@ -113,6 +114,58 @@ const createEnrolledCourse = async (
    }
 };
 
+const updateEnrolledCourseMarks = async (
+   facultyId: string,
+   payload: Partial<TEnrolledCourse>,
+) => {
+   const { semesterRegistration, offeredCourse, student, courseMarks } =
+      payload;
+
+   const isSemesterRegistrationExists =
+      await SemesterRegistrationModel.findById(semesterRegistration);
+   if (!isSemesterRegistrationExists) {
+      throw new AppError(404, "Semester registration not found");
+   }
+
+   const isOfferedCourseExists =
+      await OfferedCourseModel.findById(offeredCourse);
+   if (!isOfferedCourseExists) {
+      throw new AppError(404, "Offered course not found");
+   }
+
+   const isStudentExists = await StudentModel.findById(student);
+   if (!isStudentExists) {
+      throw new AppError(404, "Student not found");
+   }
+
+   const faculty = await FacultyModel.findOne({ id: facultyId });
+   if (!faculty) {
+      throw new AppError(404, "Faculty not found");
+   }
+   console.log(faculty._id);
+
+   const isFacultyExists = await EnrolledCourseModel.findOne({
+      faculty: faculty._id,
+   });
+   if (!isFacultyExists) {
+      throw new AppError(404, "Faculty not found");
+   }
+
+   const result = await EnrolledCourseModel.findOneAndUpdate(
+      {
+         semesterRegistration,
+         offeredCourse,
+         student,
+      },
+      {
+         courseMarks,
+      },
+      { new: true },
+   );
+   return result;
+};
+
 export const EnrolledCourseService = {
    createEnrolledCourse,
+   updateEnrolledCourseMarks,
 };
