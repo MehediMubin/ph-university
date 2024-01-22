@@ -13,10 +13,15 @@ const auth = (...requiredRoles: TUserRole[]) => {
          throw new AppError(401, "Unauthorized");
       }
 
-      const decoded = jwt.verify(
-         token,
-         config.jwt_access_secret as string,
-      ) as JwtPayload;
+      let decoded;
+      try {
+         decoded = jwt.verify(
+            token,
+            config.jwt_access_secret as string,
+         ) as JwtPayload;
+      } catch (err) {
+         throw new AppError(401, "Unauthorized");
+      }
 
       const { id, role, iat } = decoded;
 
