@@ -155,6 +155,8 @@ const updateEnrolledCourseMarks = async (
       },
       { new: true },
    );
+   if (!result) throw new AppError(500, "Internal server error");
+
    return result;
 };
 

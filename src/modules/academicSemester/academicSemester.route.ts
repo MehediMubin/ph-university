@@ -1,4 +1,5 @@
 import { Router } from "express";
+import auth from "../../middleware/auth";
 import validateRequest from "../../middleware/validateRequest";
 import { academicSemesterController } from "./academicSemester.controller";
 import { academicSemesterValidations } from "./academicSemester.validation";
@@ -11,7 +12,11 @@ router.post(
    academicSemesterController.createAcademicSemester,
 );
 
-router.get("/", academicSemesterController.getAllAcademicSemester);
+router.get(
+   "/",
+   auth("admin"),
+   academicSemesterController.getAllAcademicSemester,
+);
 
 router.get("/:id", academicSemesterController.getSingleAcademicSemester);
 
