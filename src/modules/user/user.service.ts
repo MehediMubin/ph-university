@@ -1,11 +1,16 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { JwtPayload } from "jsonwebtoken";
 import mongoose from "mongoose";
 import config from "../../config";
 import AppError from "../../errors/AppError";
 import { sendImageToCloudinary } from "../../utils/sendImageToCloudinary";
+import { AcademicDepartmentModel } from "../academicDepartment/academicDepartment.model";
+import { TAcademicSemester } from "../academicSemester/academicSemester.interface";
 import { AcademicSemesterModel } from "../academicSemester/academicSemester.model";
+import { TAdmin } from "../admin/admin.interface";
 import { AdminModel } from "../admin/admin.model";
 import { FacultyModel } from "../faculty/faculty.model";
+import { TStudent } from "../student/student.interface";
 import { StudentModel } from "../student/student.model";
 import { TUser } from "./user.interface";
 import { UserModel } from "./user.model";
@@ -15,150 +20,210 @@ import {
    generateStudentId,
 } from "./user.utils";
 
-const createStudent = async (imageFile, password: string, payload) => {
-   const user: Partial<TUser> = {};
+const createStudent = async (
+   file: any,
+   password: string,
+   payload: TStudent,
+) => {
+   // create a user object
+   const userData: Partial<TUser> = {};
 
-   user.password = password || (config.default_password as string);
-   user.role = "student";
-   user.email = payload.email;
+   //if password is not given , use default password
+   userData.password = password || (config.default_password as string);
 
+   //set student role
+   userData.role = "student";
+   // set student email
+   userData.email = payload.email;
+
+   // find academic semester info
    const admissionSemester = await AcademicSemesterModel.findById(
       payload.admissionSemester,
    );
 
+   if (!admissionSemester) {
+      throw new AppError(400, "Admission semester not found");
+   }
+
+   // find department
+   const academicDepartment = await AcademicDepartmentModel.findById(
+      payload.academicDepartment,
+   );
+
+   if (!academicDepartment) {
+      throw new AppError(400, "Aademic department not found");
+   }
+   payload.academicFaculty = academicDepartment.academicFaculty;
+
    const session = await mongoose.startSession();
 
    try {
       session.startTransaction();
-      user.id = await generateStudentId(admissionSemester);
+      //set  generated id
+      userData.id = await generateStudentId(admissionSemester);
 
-      const imageName = `${user.id}-${payload?.name?.firstName}`;
-      const { secure_url } = await sendImageToCloudinary(
-         imageName,
-         imageFile.path,
-      );
+      if (file) {
+         const imageName = `${userData.id}${payload?.name?.firstName}`;
+         const path = file?.path;
 
-      payload.profileImage = secure_url;
-
-      // transaction 1
-      const newUser = await UserModel.create([user], { session });
-
-      // transaction use korar karone newUser array hoye jay
-      if (!newUser.length) {
-         throw new AppError(400, "User creation failed");
+         //send image to cloudinary
+         const { secure_url } = await sendImageToCloudinary(imageName, path);
+         payload.profileImage = secure_url as string;
       }
 
-      payload.user = newUser[0]._id;
-      payload.id = newUser[0].id;
+      // create a user (transaction-1)
+      const newUser = await UserModel.create([userData], { session }); // array
 
-      // transaction 2
+      //create a student
+      if (!newUser.length) {
+         throw new AppError(400, "Failed to create user");
+      }
+      // set id , _id as user
+      payload.id = newUser[0].id;
+      payload.user = newUser[0]._id; //reference _id
+
+      // create a student (transaction-2)
       const newStudent = await StudentModel.create([payload], { session });
 
       if (!newStudent.length) {
-         throw new AppError(400, "Student creation failed");
+         throw new AppError(400, "Failed to create student");
       }
 
       await session.commitTransaction();
-      session.endSession();
+      await session.endSession();
 
       return newStudent;
-   } catch (err) {
+   } catch (err: any) {
       await session.abortTransaction();
-      session.endSession();
-      throw Error("Student creation failed");
+      await session.endSession();
+      throw new Error(err);
    }
 };
 
-const createFaculty = async (imageFile, password: string, payload) => {
-   // console.log(payload);
-   const user: Partial<TUser> = {};
+const createFaculty = async (
+   file: any,
+   password: string,
+   payload: TFaculty,
+) => {
+   // create a user object
+   const userData: Partial<TUser> = {};
 
-   user.password = password || (config.default_password as string);
-   user.role = "faculty";
-   user.email = payload.email;
+   //if password is not given , use deafult password
+   userData.password = password || (config.default_password as string);
+
+   //set faculty role
+   userData.role = "faculty";
+   //set faculty email
+   userData.email = payload.email;
+
+   // find academic department info
+   const academicDepartment = await AcademicDepartment.findById(
+      payload.academicDepartment,
+   );
+
+   if (!academicDepartment) {
+      throw new AppError(400, "Academic department not found");
+   }
+
+   payload.academicFaculty = academicDepartment?.academicFaculty;
 
    const session = await mongoose.startSession();
+
    try {
       session.startTransaction();
-      user.id = await generateFacultyId();
+      //set  generated id
+      userData.id = await generateFacultyId();
 
-      const imageName = `${user.id}-${payload?.name?.firstName}`;
-      const { secure_url } = await sendImageToCloudinary(
-         imageName,
-         imageFile.path,
-      );
-
-      payload.profileImage = secure_url;
-
-      const newUser = await UserModel.create([user], { session });
-
-      if (!newUser.length) {
-         throw new AppError(400, "User creation failed");
+      if (file) {
+         const imageName = `${userData.id}${payload?.name?.firstName}`;
+         const path = file?.path;
+         //send image to cloudinary
+         const { secure_url } = await sendImageToCloudinary(imageName, path);
+         payload.profileImg = secure_url as string;
       }
 
-      payload.user = newUser[0]._id;
+      // create a user (transaction-1)
+      const newUser = await User.create([userData], { session }); // array
+
+      //create a faculty
+      if (!newUser.length) {
+         throw new AppError(400, "Failed to create user");
+      }
+      // set id , _id as user
       payload.id = newUser[0].id;
+      payload.user = newUser[0]._id; //reference _id
+
+      // create a faculty (transaction-2)
 
       const newFaculty = await FacultyModel.create([payload], { session });
 
       if (!newFaculty.length) {
-         throw new AppError(400, "Faculty creation failed");
+         throw new AppError(400, "Failed to create faculty");
       }
 
       await session.commitTransaction();
-      session.endSession();
+      await session.endSession();
 
       return newFaculty;
-   } catch (err) {
+   } catch (err: any) {
       await session.abortTransaction();
-      session.endSession();
-      throw new Error("Faculty creation failed");
+      await session.endSession();
+      throw new Error(err);
    }
 };
 
-const createAdmin = async (imageFile, password: string, payload) => {
-   const user: Partial<TUser> = {};
+const createAdmin = async (file: any, password: string, payload: TAdmin) => {
+   // create a user object
+   const userData: Partial<TUser> = {};
 
-   user.password = password || (config.default_password as string);
-   user.role = "admin";
-   user.email = payload.email;
+   //if password is not given , use deafult password
+   userData.password = password || (config.default_password as string);
 
+   //set student role
+   userData.role = "admin";
+   //set admin email
+   userData.email = payload.email;
    const session = await mongoose.startSession();
+
    try {
       session.startTransaction();
-      user.id = await generateAdminId();
+      //set  generated id
+      userData.id = await generateAdminId();
 
-      const imageName = `${user.id}-${payload?.name?.firstName}`;
-      const { secure_url } = await sendImageToCloudinary(
-         imageName,
-         imageFile.path,
-      );
-
-      payload.profileImage = secure_url;
-
-      const newUser = await UserModel.create([user], { session });
-
-      if (!newUser.length) {
-         throw new AppError(400, "User creation failed");
+      if (file) {
+         const imageName = `${userData.id}${payload?.name?.firstName}`;
+         const path = file?.path;
+         //send image to cloudinary
+         const { secure_url } = await sendImageToCloudinary(imageName, path);
+         payload.profileImage = secure_url as string;
       }
 
-      payload.user = newUser[0]._id;
-      payload.id = newUser[0].id;
+      // create a user (transaction-1)
+      const newUser = await UserModel.create([userData], { session });
 
+      //create a admin
+      if (!newUser.length) {
+         throw new AppError(400, "Failed to create admin");
+      }
+      // set id , _id as user
+      payload.id = newUser[0].id;
+      payload.user = newUser[0]._id; //reference _id
+
+      // create a admin (transaction-2)
       const newAdmin = await AdminModel.create([payload], { session });
 
       if (!newAdmin.length) {
-         throw new AppError(400, "Admin creation failed");
+         throw new AppError(400, "Failed to create admin");
       }
 
       await session.commitTransaction();
-      session.endSession();
+      await session.endSession();
 
       return newAdmin;
-   } catch (err) {
+   } catch (err: any) {
       await session.abortTransaction();
-      session.endSession();
-      throw new Error("Admin creation failed");
+      await session.endSession();
+      throw new Error(err);
    }
 };
 
