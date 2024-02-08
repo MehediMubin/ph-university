@@ -5,7 +5,12 @@ import { TStudent } from "./student.interface";
 import { StudentModel } from "./student.model";
 
 const getAllStudents = async (query: Record<string, unknown>) => {
-   const studentSearchableFields = ["email", "name.firstName", "name.lastName"];
+   const studentSearchableFields = [
+      "email",
+      "name.firstName",
+      "name.lastName",
+      "presentAddress",
+   ];
 
    let searchQuery = "";
    if (query?.search) {

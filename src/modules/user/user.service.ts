@@ -9,6 +9,7 @@ import { TAcademicSemester } from "../academicSemester/academicSemester.interfac
 import { AcademicSemesterModel } from "../academicSemester/academicSemester.model";
 import { TAdmin } from "../admin/admin.interface";
 import { AdminModel } from "../admin/admin.model";
+import { TFaculty } from "../faculty/faculty.interface";
 import { FacultyModel } from "../faculty/faculty.model";
 import { TStudent } from "../student/student.interface";
 import { StudentModel } from "../student/student.model";
@@ -117,7 +118,7 @@ const createFaculty = async (
    userData.email = payload.email;
 
    // find academic department info
-   const academicDepartment = await AcademicDepartment.findById(
+   const academicDepartment = await AcademicDepartmentModel.findById(
       payload.academicDepartment,
    );
 
@@ -125,7 +126,7 @@ const createFaculty = async (
       throw new AppError(400, "Academic department not found");
    }
 
-   payload.academicFaculty = academicDepartment?.academicFaculty;
+   payload.academicFaculty = academicDepartment.academicFaculty;
 
    const session = await mongoose.startSession();
 
@@ -139,19 +140,19 @@ const createFaculty = async (
          const path = file?.path;
          //send image to cloudinary
          const { secure_url } = await sendImageToCloudinary(imageName, path);
-         payload.profileImg = secure_url as string;
+         payload.profileImage = secure_url as string;
       }
 
       // create a user (transaction-1)
-      const newUser = await User.create([userData], { session }); // array
+      const newUser = await UserModel.create([userData], { session }); // array
 
       //create a faculty
       if (!newUser.length) {
          throw new AppError(400, "Failed to create user");
       }
-      // set id , _id as user
+      // // set id , _id as user
       payload.id = newUser[0].id;
-      payload.user = newUser[0]._id; //reference _id
+      // payload.user = newUser[0]._id; //reference _id
 
       // create a faculty (transaction-2)
 

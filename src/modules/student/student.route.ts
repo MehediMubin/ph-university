@@ -1,25 +1,35 @@
 import { Router } from "express";
 import auth from "../../middleware/auth";
 import validateRequest from "../../middleware/validateRequest";
+import { USER_ROLE } from "../user/user.constant";
 import { StudentController } from "./student.controller";
 import { studentValidations } from "./student.validation";
 
 const router = Router();
 
-router.get("/", StudentController.getAllStudents);
+router.get(
+   "/",
+   auth(USER_ROLE.admin, USER_ROLE.superAdmin),
+   StudentController.getAllStudents,
+);
 
 router.get(
    "/:id",
-   auth("admin", "faculty"),
+   auth(USER_ROLE.admin, USER_ROLE.superAdmin, USER_ROLE.faculty),
    StudentController.getSingleStudent,
 );
 
 router.patch(
    "/:id",
+   auth(USER_ROLE.admin, USER_ROLE.superAdmin),
    validateRequest(studentValidations.updateStudent),
    StudentController.updateSingleStudent,
 );
 
-router.delete("/:id", StudentController.deleteSingleStudent);
+router.delete(
+   "/:id",
+   auth(USER_ROLE.admin, USER_ROLE.superAdmin),
+   StudentController.deleteSingleStudent,
+);
 
 export const StudentRoutes = router;

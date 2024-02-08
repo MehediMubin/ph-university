@@ -3,7 +3,7 @@ import sendResponse from "../../utils/sendResponse";
 import { FacultyServices } from "./faculty.service";
 
 const getAllFaculties = catchAsync(async (req, res) => {
-   console.log(req.cookies);
+   // console.log(req.cookies);
    const faculties = await FacultyServices.getAllFaculties();
    sendResponse(res, {
       statusCode: 200,
