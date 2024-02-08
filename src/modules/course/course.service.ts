@@ -46,6 +46,13 @@ const getSingleCourse = async (id: string) => {
    return result;
 };
 
+const getFacultyWithCourse = async (id: string) => {
+   const result = await CourseFacultyModel.findOne({ course: id }).populate(
+      "faculties",
+   );
+   return result;
+};
+
 const updateCourse = async (id: string, payload: Partial<TCourse>) => {
    const { preRequisiteCourses, ...remainingCourseData } = payload;
 
@@ -171,6 +178,7 @@ export const CourseServices = {
    createCourse,
    getAllCourses,
    getSingleCourse,
+   getFacultyWithCourse,
    updateCourse,
    assignFaculties,
    removeFaculties,

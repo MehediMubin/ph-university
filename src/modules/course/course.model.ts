@@ -51,7 +51,7 @@ const courseFacultySchema = new Schema<TCourseFaculty>({
    faculties: [
       {
          type: Schema.Types.ObjectId,
-         ref: "Faculty",
+         ref: "faculty",
       },
    ],
 });
